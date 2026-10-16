@@ -1,0 +1,92 @@
+---
+title: "AgentMail | Tools"
+description: "Give Mastra agents real email inboxes with AgentMail tools for creating inboxes, sending, receiving, replying, searching, and managing threads and drafts."
+packages:
+  - "@mastra/agentmail"
+---
+
+# AgentMail
+
+The `@mastra/agentmail` package wraps the [AgentMail](https://agentmail.to) API as Mastra-compatible tools. AgentMail is an email API built for AI agents: one API call provisions a working inbox with its own address, no OAuth and no human account behind it. The package exposes factory functions for inboxes, messages, threads, and drafts. Each function returns a tool created with [`createTool()`](/reference/tools/create-tool) that includes full Zod input/output schemas.
+
+## Installation
+
+```sh npm2yarn
+npm install @mastra/agentmail agentmail zod
+```
+
+## Quick start
+
+Use `createAgentMailTools()` to get all twelve tools with shared configuration:
+
+```typescript title="src/mastra/tools/index.ts"
+import { createAgentMailTools } from '@mastra/agentmail'
+
+const tools = createAgentMailTools()
+// Or pass an explicit API key:
+// const tools = createAgentMailTools({ apiKey: 'am_...' })
+```
+
+Each tool can also be created individually:
+
+```typescript title="src/mastra/tools/index.ts"
+import { createAgentMailSendMessageTool, createAgentMailListMessagesTool } from '@mastra/agentmail'
+
+const sendTool = createAgentMailSendMessageTool()
+const listTool = createAgentMailListMessagesTool({ apiKey: 'am_...' })
+```
+
+By default, all tools read `AGENTMAIL_API_KEY` from the environment. You can pass `{ apiKey }` explicitly to override. Get an API key from the [AgentMail Console](https://console.agentmail.to).
+
+## Using with an agent
+
+```typescript title="src/mastra/agents/email-assistant.ts"
+import { Agent } from '@mastra/core/agent'
+import { createAgentMailTools } from '@mastra/agentmail'
+
+export const emailAssistant = new Agent({
+  id: 'email-assistant',
+  name: 'Email Assistant',
+  instructions:
+    'You manage email through your AgentMail inbox. Use the agentmail tools to send, read, reply, and search. An inbox id is its full email address.',
+  model: 'anthropic/claude-sonnet-4-5',
+  tools: createAgentMailTools(),
+})
+```
+
+## Available tools
+
+| Factory | Tool id | Description |
+| - | - | - |
+| `createAgentMailCreateInboxTool` | `agentmail-create-inbox` | Create a new inbox. The inbox id is its email address. |
+| `createAgentMailListInboxesTool` | `agentmail-list-inboxes` | List inboxes available to this API key. |
+| `createAgentMailSendMessageTool` | `agentmail-send-message` | Send a new email, starting a new thread. |
+| `createAgentMailReplyToMessageTool` | `agentmail-reply-to-message` | Reply within a thread. Threading headers handled automatically. |
+| `createAgentMailForwardMessageTool` | `agentmail-forward-message` | Forward an email to new recipients. |
+| `createAgentMailGetMessageTool` | `agentmail-get-message` | Fetch one email with its full text body. |
+| `createAgentMailListMessagesTool` | `agentmail-list-messages` | List recent emails with compact summaries. |
+| `createAgentMailSearchMessagesTool` | `agentmail-search-messages` | Full-text search across an inbox. |
+| `createAgentMailGetThreadTool` | `agentmail-get-thread` | Fetch a full conversation thread in order. |
+| `createAgentMailListThreadsTool` | `agentmail-list-threads` | List conversation threads. |
+| `createAgentMailCreateDraftTool` | `agentmail-create-draft` | Stage an email (plain, reply, or forward) without sending. |
+| `createAgentMailSendDraftTool` | `agentmail-send-draft` | Send a previously staged draft. |
+
+## Configuration
+
+All factory functions accept `AgentMailClientOptions`:
+
+<PropertiesTable
+  content={[
+  {
+    name: 'apiKey',
+    type: 'string',
+    description: 'AgentMail API key. Falls back to the `AGENTMAIL_API_KEY` environment variable.',
+    isOptional: true,
+  },
+]}
+/>
+
+## Related
+
+- [AgentMail documentation](https://docs.agentmail.to)
+- [`createTool()` reference](/reference/tools/create-tool)

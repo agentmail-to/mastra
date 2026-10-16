@@ -622,6 +622,12 @@ const sidebars = {
       items: [
         {
           type: 'doc',
+          id: 'tools/agentmail',
+          label: 'AgentMail',
+          customProps: { icon: '/img/integrations/agentmail.svg', customCSS: 'dark:invert' },
+        },
+        {
+          type: 'doc',
           id: 'tools/brightdata',
           label: 'Bright Data',
           customProps: { icon: '/img/integrations/bright-data.svg' },
